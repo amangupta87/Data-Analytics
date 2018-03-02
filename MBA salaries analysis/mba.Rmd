@@ -1,1 +1,369 @@
+---
+title: "MBA Starting Salaries"
+output: html_document
+author: "Aman Gupta"
+date : February 20, 2018
+---
+
+
+### Read the data
+```{r}
+mba.df <- read.csv(paste("MBA Starting Salaries Data.csv", sep=""))
+View(mba.df)
+```
+
+### Attach the dataframe
+```{r}
+attach(mba.df)
+```
+
+### Summarize the data
+```{r}
+summary(mba.df)
+library(psych)
+describe(mba.df)
+```
+
+### Data Types
+```{r}
+str(mba.df)
+```
+
+# Visualization
+```{r}
+hist(mba.df$age, breaks=20,col="blue",xlab="Age in years", main="Age  distribution")
+```
+
+```{r}
+plot(mba.df$sex,main = "Graph showing number of Males and Females",col="pink")
+```
+
+```{r}
+hist(mba.df$work_yrs, breaks=20,col="blue",xlab="Work Experience in years", main="Work experience distribution")
+```
+
+```{r}
+hist(mba.df$gmat_tot, breaks=40,col="blue",xlab="score out of 800", main="Gmat Score distribution")
+```
+
+```{r}
+plot(mba.df$frstlang,main = "First Language Distribution",col="red")
+```
+
+
+```{r}
+newdata <- mba.df[ which(mba.df$satis<='7'), ]
+hist(newdata$satis, breaks=5,col="yellow",xlab="Degree of Satisfaction,1=low 7=high", main="Satisfaction  distribution")
+```
+
+```{r}
+newdata1 <- mba.df[ which(mba.df$salary !="998" & mba.df$salary !="999"), ]
+hist(newdata1$salary, breaks=10,col="yellow",xlab="starting salary", main="Salary  distribution")
+```
+
+
+```{r}
+aggregate(cbind(salary, work_yrs, age) ~ sex, data = mba.df, mean)   # Effect of gender on salary
+```
+
+
+```{r}
+boxplot(salary ~ sex ,data=mba.df,col = c("magenta","green"), main="Effect of Gender on Salary", ylab="Gender", xlab="Starting Salary")
+```
+
+
+```{r}
+aggregate(cbind(salary, work_yrs) ~ age, data = mba.df, mean)    #  Effect of age on Salary
+```
+
+
+```{r}
+aggregate(cbind(salary, work_yrs) ~ satis , data = mba.df, mean)   # Effect of Salary on the Satisfaction level
+```
+
+
+```{r}
+boxplot(salary ~ work_yrs ,data=mba.df, main="Effect of Work Experience on Salary", xlab="Work Experience", ylab="Starting Salary",col=c("red","orangered","yellow2","green3","skyblue","blue2"))
+```
+
+
+```{r}
+mba.df$sex=factor(mba.df$sex, levels=c(1,2), labels=c("Male","Female"))
+plot(mba.df$sex,col = c("blue","turquoise"),main = "Gender distribution")
+```
+
+
+```{r}
+mba.df$frstlang = factor(mba.df$frstlang, levels=c(1,2), labels=c("English","Others"))
+plot(mba.df$frstlang,col=c("yellow","green"),main = "Language Distribution")
+```
+
+
+# Scatter Plots
+```{r}
+library(car)
+scatterplot(salary ~age, data=newdata1,
+            spread=FALSE, smoother.args=list(lty=2),
+            main="Scatter plot of salary vs age",
+            xlab="age",
+            ylab="salary")
+```
+
+
+```{r}
+scatterplot(salary ~sex,     data=newdata1,
+            spread=FALSE, smoother.args=list(lty=2),
+            main="Scatter plot of salary vs sex",
+            xlab="sex",
+            ylab="salary")
+```
+
+
+```{r}
+scatterplot(salary ~frstlang,     data=newdata1,
+            main="Scatter plot of salary vs first language",
+            xlab="first language",
+            ylab="salary")
+```
+
+
+```{r}
+scatterplot(salary ~gmat_tot,     data=newdata1,
+            main="Scatter plot of salary vs Gmat total",
+            xlab="Gmat score",
+            ylab="salary")
+```
+
+
+```{r}
+scatterplot(salary ~work_yrs,     data=newdata1,
+            main="Scatter plot of salary vs Work exp.",
+            xlab="Work experience in years",
+            ylab="salary")
+```
+
+
+```{r}
+scatterplot(salary ~satis,     data=newdata1,
+            main="Scatter plot of salary vs satisfaction",
+            xlab="Degree of satisfaction",
+            ylab="salary")
+```
+
+
+# Scatterplot Matrix
+```{r}
+scatterplotMatrix(~age+sex+salary, data=mba.df)
+```
+
+```{r}
+scatterplotMatrix(~work_yrs+satis+salary, data=mba.df)
+```
+
+```{r}
+scatterplotMatrix(~gmat_tot+s_avg+f_avg+salary, data=mba.df)
+```
+
+```{r}
+scatterplotMatrix(~age+sex+gmat_tot+s_avg+f_avg+work_yrs+salary+satis, data=mba.df)
+```
+
+
+# Corrgram
+```{r}
+library(corrgram)
+corrgram(mba.df, order=FALSE, 
+         lower.panel=panel.shade,
+         upper.panel=panel.pie, 
+         text.panel=panel.txt,
+         main="Corrgram of salaries data")
+```
+
+
+# Correlation Matrix
+```{r}
+correlationmatrix <- cor(mba.df[,c(3:10,12,13)])
+round(correlationmatrix,digits = 2)
+```
+
+
+# Variance- Covariance Matrix
+```{r}
+VarianceCovariancematrix <- var(mba.df[,1:13])
+round(VarianceCovariancematrix, 2)
+```
+
+
+# Dataframe of those who were placed
+```{r}
+placed.df <- mba.df[ which(mba.df$salary !="998" & mba.df$salary !="999" & mba.df$salary!="0"), ]
+head(placed.df)
+```
+
+# Contingency tables showing the affect of various factors on the starting salary
+
+```{r}
+t1 <- xtabs(~salary+sex,data=placed.df)
+t1
+```
+From this table it is evident that mostly men have higher starting salaries compared to women.
+
+
+```{r}
+t2 <- xtabs(~salary+work_yrs,data=placed.df)
+t2
+```
+From the above table it is evident that a minimum of 2 years of work experience is necessary for a good salary.
+
+
+```{r}
+t3 <- xtabs(~salary+gmat_tot,data=placed.df)
+t3
+```
+Generally, people with high Gmat Score also have high salaries.
+
+
+```{r}
+t4 <-xtabs(~salary+frstlang,data=placed.df)
+t4
+```
+Employees with English as first language are mostly preferred and are given higher salaries compared to those who don't have English as their first language.
+
+
+### Chi-squared test
+```{r}
+chisq.test(placed.df$age,placed.df$salary)
+```
+
+
+```{r}
+chisq.test(placed.df$sex,placed.df$salary)
+```
+
+
+```{r}
+chisq.test(placed.df$gmat_tot,placed.df$salary)
+```
+
+
+```{r}
+chisq.test(placed.df$s_avg,placed.df$salary)
+```
+
+
+```{r}
+chisq.test(placed.df$f_avg,placed.df$salary)
+```
+
+
+```{r}
+chisq.test(placed.df$work_yrs,placed.df$salary)
+```
+
+
+```{r}
+chisq.test(placed.df$frstlang,placed.df$salary)
+```
+The results of the Chi-Squared tests tell us that age, GMAT percentiles, work experience and first language are factors that are statistically significant for starting salary (p < 0.05), whereas gender, average GPA for Spring and Fall semesters and quartile ranking with degree are not statistically significant for salary (p > 0.05). 
+
+##### T-test
+```{r}
+log.transformed.salary=log(placed.df$salary)
+t.test(log.transformed.salary~ placed.df$sex, var.equal = TRUE)
+```
+This T-test shows that there is a significant difference in salaries of men and women.
+
+
+# Dataset consisting of people who were not placed
+```{r}
+notPlaced.df <- mba.df[ which(mba.df$salary !="998" & mba.df$salary !="999" & mba.df$salary==0), ]
+head(notPlaced.df)
+```
+
+
+```{r}
+hist(notPlaced.df$gmat_tot,
+     main = "GMAT performance of students who were not placed",
+     xlab="GMAT score",
+     breaks=10,
+     col = "green")
+```
+GMAT score is distributed between 550-650 for unplaced students while it is more scattered amongst those who do have a job.
+
+
+```{r}
+chisq.test(notPlaced.df$work_yrs,notPlaced.df$satis)
+```
+This shows that the unplaced students with work experience are satisfied with the MBA program.
+
+
+# Regression Analysis
+
+### Preparing for regression analysis
+```{r}
+mba.df$sex[mba.df$sex == 1] <- 'Male' 
+mba.df$sex[mba.df$sex == 2] <- 'Female'
+mba.df$sex <- factor(mba.df$sex) 
+mba.df$frstlang[mba.df$frstlang == 1] <- 'English' 
+mba.df$frstlang[mba.df$frstlang == 2] <- 'Other' 
+mba.df$frstlang <- factor(mba.df$frstlang)
+```
+
+
+### Model 1
+
+```{r}
+fit1 <- lm(salary ~ gmat_tot + gmat_vpc + gmat_qpc + gmat_tpc , data=placed.df)
+summary(fit1)
+```
+Gmat_tpc is a significant variable in model 1 The multiple R squared value indicates that the model accounts for 6% of the variance in the variables The residual error (17670) can be thought of as the average error in predicting salary using the various gmat data available.
+
+### Model 2
+
+```{r}
+fit2 <- lm(salary ~ frstlang + satis + work_yrs , data=placed.df)
+summary(fit2)
+```
+work_yrs and frstlang are significant variables in model 2 The multiple R squared value indicates that the model accounts for 24.66% of the variance in the variables The residual error(15740) can be thought of as the average error in predicting salary using work experience, job satisfaction and first language.
+
+### Model 3
+
+```{r}
+fit3 <- lm(salary ~  s_avg + f_avg , data=placed.df)
+summary(fit3)
+```
+
+##### We can see that model 2 is better than model 1 and model 3, with a higher R-squared value.
+
+```{r}
+# beta coefficients
+fit2$coefficients
+```
+
+
+```{r}
+# confidence intervals
+confint(fit2)
+```
+
+
+### Visualizing the beta coefficients
+```{r}
+library(coefplot)
+library(ggplot2)
+coefplot(fit2, predictors=c("work_yrs", "frstlang", "satis"))
+```
+
+### Executive Summary
+
+* The starting salary of the Mba program of any individual student depends critically on the first language of the student and the degree of satisfaction estimated through various boxplots and the scatterplots.
+
+* Even from the corrogram and the correlation matrices , it is quite clear that the starting salaries are strongly correlated with the first language.
+
+* From the chi- squared tests and the t-tests between the people who got a job and those who did not get a job , it can be analysed that there is a significant relationship between the starting salaries , degree of satisfaction of the MBA program and the first language of the people.
+
+* The Regression model ,i.e. the best fit model , here the second model helps us in concluding that the salary has more or less a significant effect from work years experience, first language and satisfaction degree.
+
+
+-------------------------------------------------------------------------------------------------------
 
